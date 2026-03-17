@@ -1,0 +1,1 @@
+CREATE INDEX "idx_matches_created_at_desc" ON "matches" USING btree ("created_at" DESC NULLS LAST);
