@@ -8,6 +8,10 @@ export function getMatchStatus(startTime, endTime, now = new Date()) {
     return null;
   }
 
+  if (end.getTime() <= start.getTime()) {
+    return null;
+  }
+
   if (now < start) {
     return MATCH_STATUS.SCHEDULED;
   }

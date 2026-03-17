@@ -6,6 +6,7 @@ import {
   integer,
   pgEnum,
   jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 
 // Define match_status enum
@@ -16,18 +17,26 @@ export const matchStatusEnum = pgEnum("match_status", [
 ]);
 
 // Matches table
-export const matches = pgTable("matches", {
-  id: serial("id").primaryKey(),
-  sport: text("sport").notNull(),
-  homeTeam: text("home_team").notNull(),
-  awayTeam: text("away_team").notNull(),
-  status: matchStatusEnum("status").notNull().default("scheduled"),
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time"),
-  homeScore: integer("home_score").notNull().default(0),
-  awayScore: integer("away_score").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+export const matches = pgTable(
+  "matches",
+  {
+    id: serial("id").primaryKey(),
+    sport: text("sport").notNull(),
+    homeTeam: text("home_team").notNull(),
+    awayTeam: text("away_team").notNull(),
+    status: matchStatusEnum("status").notNull().default("scheduled"),
+    startTime: timestamp("start_time").notNull(),
+    endTime: timestamp("end_time"),
+    homeScore: integer("home_score").notNull().default(0),
+    awayScore: integer("away_score").notNull().default(0),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    createdAtIdx: index("idx_matches_created_at_desc").on(
+      table.createdAt.desc(),
+    ),
+  }),
+);
 
 // Commentary table
 export const commentary = pgTable("commentary", {
