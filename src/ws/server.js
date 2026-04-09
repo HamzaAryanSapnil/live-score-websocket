@@ -22,31 +22,38 @@ export function attachWebSocketServer(server) {
     maxPayload: 1024 * 1024,
   });
 
-  wss.on("connection", async (socket, req) => {
-    if (wsArcjet) {
-      try {
-        const decision = await wsArcjet.protect(req);
-
-        if (decision.isDenied()) {
-          const code = decision.reason.isRateLimit() ? 1013 : 1008;
-          const reason = decision.reason.isRateLimit()
-            ? "Rate Limit Exceeded"
-            : "Access Denied";
-          socket.close(code, reason);
-          return;
-        }
-      } catch (e) {
-        console.error("WS connection error: ", e);
-        socket.close(1011, "Server Security Violation");
-        return;
-      }
-    }
-
+  wss.on("connection", (socket, req) => {
     socket.isAlive = true;
     socket.on("pong", () => (socket.isAlive = true));
     sendJson(socket, { type: "welcome" });
 
     socket.on("error", console.error);
+  });
+
+  server.on("upgrade", async (req, socket, head) => {
+    if (!wsArcjet) {
+      wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
+      return;
+    }
+
+    try {
+      const decision = await wsArcjet.protect(req);
+
+      if (decision.isDenied()) {
+        if (decision.reason.isRateLimit()) {
+          socket.write("HTTP/1.1 429 Too Many Requests\r\n\r\n");
+        } else {
+          socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+        }
+        socket.destroy();
+        return;
+      }
+
+      wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
+    } catch (e) {
+      console.error("WS upgrade error: ", e);
+      socket.destroy();
+    }
   });
 
   const interval = setInterval(() => {
