@@ -49,6 +49,7 @@ function generateMatchData(suffix) {
   const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000); // 2 hours later
 
   return {
+    sport: "Football",
     homeTeam: `Team A ${suffix}`,
     awayTeam: `Team B ${suffix}`,
     startTime: startTime.toISOString(),
