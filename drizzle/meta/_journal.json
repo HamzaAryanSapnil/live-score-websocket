@@ -8,6 +8,13 @@
       "when": 1773729389920,
       "tag": "0000_modern_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773748460835,
+      "tag": "0001_stiff_pixie",
+      "breakpoints": true
     }
   ]
 }
